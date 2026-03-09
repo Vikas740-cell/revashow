@@ -5,13 +5,9 @@ dist/
 build/
 
 # prisma cache
-prismacache/
 server/prismacache/
+server/prismacache*/
 
 # logs
 logs/
 *.log
-
-# OS files
-.DS_Store
-Thumbs.db
