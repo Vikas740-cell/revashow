@@ -1,106 +1,206 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import CategoryFilters from '../components/CategoryFilters';
 import EventCard from '../components/EventCard';
-import { ArrowRight } from 'lucide-react';
-
-const dummyEvents = [
-  { id: 1, title: "REVAMP 2024: Annual Fest", venue: "Open Air Theatre", date: "MAR 15", category: "Festival", isFree: false, poster: "https://images.unsplash.com/photo-1540575861501-7ad0582381f2?q=80&w=2070&auto=format&fit=crop" },
-  { id: 2, title: "AI/ML Workshop by GDSC", venue: "Kula Hall", date: "MAR 18", category: "Workshop", isFree: true, poster: "https://images.unsplash.com/photo-1591115765373-520b7a217217?q=80&w=2070&auto=format&fit=crop" },
-  { id: 3, title: "Pratibha: Cultural Show", venue: "Auditorium", date: "MAR 20", category: "Music", isFree: false, poster: "https://images.unsplash.com/photo-1514525253344-99a4249a2213?q=80&w=2070&auto=format&fit=crop" },
-  { id: 4, title: "IPL Screening: RCB vs CSK", venue: "Football Ground", date: "MAR 22", category: "Sports", isFree: true, poster: "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?q=80&w=2070&auto=format&fit=crop" },
-  { id: 5, title: "Tech Hunt: Coding Challenge", venue: "Block 4 - Lab 302", date: "MAR 25", category: "Engineering", isFree: true, poster: "https://images.unsplash.com/photo-1517694712202-14dd9538aa97?q=80&w=2070&auto=format&fit=crop" },
-];
+import { getEvents, getTrendingEvents, getRecommendations } from '../services/eventService';
+import { ArrowRight, MapPin, Loader2, Sparkles, TrendingUp } from 'lucide-react';
 
 const LandingPage = () => {
+  const [events, setEvents] = useState([]);
+  const [trending, setTrending] = useState([]);
+  const [recommendations, setRecommendations] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [searchTerm, setSearchTerm] = useState('');
+  const [activeCategory, setActiveCategory] = useState('All');
+
+  useEffect(() => {
+    const fetchData = async () => {
+      try {
+        const [allEvents, trendingData, recommendedData] = await Promise.all([
+          getEvents(),
+          getTrendingEvents(),
+          getRecommendations()
+        ]);
+        setEvents(allEvents);
+        setTrending(trendingData);
+        setRecommendations(recommendedData);
+      } catch (err) {
+        console.error("Error fetching landing page data:", err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
+
+  const filteredEvents = events.filter(event => {
+    const titleMatch = event.title?.toLowerCase().includes(searchTerm.toLowerCase());
+    const venueMatch = event.venue?.toLowerCase().includes(searchTerm.toLowerCase());
+    const categoryMatch = activeCategory === 'All' || event.category?.name === activeCategory;
+    return (titleMatch || venueMatch) && categoryMatch;
+  });
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
+        <div className="flex flex-col items-center gap-4">
+          <Loader2 className="text-red-600 animate-spin" size={48} />
+          <p className="text-slate-500 font-bold tracking-widest uppercase text-xs animate-pulse">Syncing Campus Hub...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
-    <div className="min-h-screen bg-slate-950 flex flex-col">
-      <Navbar />
-      <CategoryFilters />
+    <div className="min-h-screen bg-slate-950 flex flex-col selection:bg-red-600/30">
+      <Navbar onSearch={setSearchTerm} />
+      <CategoryFilters activeCategory={activeCategory} setCategory={setActiveCategory} />
 
       <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
         
         {/* Banner Section */}
-        <section className="mb-12 rounded-2xl overflow-hidden relative aspect-[21/9] sm:aspect-[21/6] group cursor-pointer shadow-2xl">
+        <section className="mb-16 rounded-3xl overflow-hidden relative aspect-[21/9] sm:aspect-[21/6] group cursor-pointer shadow-2xl ring-1 ring-white/10">
            <img 
             src="https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop" 
             alt="Main Banner"
-            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-700"
+            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-1000"
            />
-           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent flex flex-col justify-end p-8">
-              <span className="bg-red-600 text-[10px] font-black w-fit px-2 py-1 rounded mb-4 tracking-widest uppercase">Now Trending</span>
-              <h1 className="text-3xl md:text-5xl font-black text-white italic tracking-tighter uppercase mb-2">Reva Mahotsav 2024</h1>
-              <p className="text-slate-300 text-sm md:text-lg max-w-2xl font-light">Experience the grandest cultural celebration of REVA University. Book your tickets now for the star-studded night!</p>
+           <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-transparent flex flex-col justify-end p-8 md:p-12">
+              <div className="flex items-center gap-2 mb-4 bg-red-600/90 text-white text-[10px] font-black w-fit px-3 py-1 rounded-full uppercase tracking-widest shadow-xl backdrop-blur-md">
+                 <Sparkles size={12} /> Live Event
+              </div>
+              <h1 className="text-4xl md:text-7xl font-black text-white italic tracking-tighter uppercase mb-3 leading-none drop-shadow-2xl">
+                Reva Show <span className="text-red-600">2024</span>
+              </h1>
+              <p className="text-slate-300 text-sm md:text-xl max-w-2xl font-medium leading-tight opacity-80">
+                The grandest celebration of talent, culture, and innovation at REVA University.
+              </p>
            </div>
         </section>
 
-        {/* Recommended Events Section */}
-        <section className="mb-12">
-          <div className="flex items-center justify-between mb-6">
-            <h2 className="text-2xl font-black text-white tracking-tight uppercase italic flex items-center gap-2">
-              <span className="w-1 h-8 bg-red-600"></span>
-              Recommended Events
+        {/* Personalized Recommendations Section */}
+        {recommendations.length > 0 && (
+          <section className="mb-16 animate-in slide-in-from-bottom-4 duration-700">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-3xl font-black text-white tracking-tighter uppercase italic flex items-center gap-3">
+                <Sparkles className="text-red-600" size={28} />
+                Picked For You
+              </h2>
+              <button className="text-slate-500 hover:text-white text-xs font-black flex items-center gap-1 transition-all uppercase tracking-widest">
+                Explore <ArrowRight size={14} />
+              </button>
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-6">
+              {recommendations.map(event => (
+                <EventCard key={event.id} event={event} compact />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Trending Events Section */}
+        {trending.length > 0 && (
+          <section className="mb-16">
+            <div className="flex items-center justify-between mb-8">
+              <h2 className="text-3xl font-black text-white tracking-tighter uppercase italic flex items-center gap-3">
+                <TrendingUp className="text-red-600" size={28} />
+                Trending Now
+              </h2>
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+              {trending.slice(0, 3).map((event, idx) => (
+                <div key={event.id} className="relative h-72 rounded-[2rem] overflow-hidden group cursor-pointer shadow-2xl border border-white/5 bg-slate-900">
+                   <img 
+                     src={event.poster || "https://images.unsplash.com/photo-1470225620780-dba8ba36b745?q=80&w=2070&auto=format&fit=crop"} 
+                     className="w-full h-full object-cover opacity-60 group-hover:opacity-100 group-hover:scale-105 transition-all duration-700 grayscale-[0.5] group-hover:grayscale-0" 
+                     alt={event.title} 
+                   />
+                   <div className="absolute top-6 left-6 flex items-center gap-2">
+                      <span className="bg-white text-black text-[10px] font-black px-2 py-1 rounded italic uppercase tracking-widest shadow-xl">
+                        #{idx + 1}
+                      </span>
+                   </div>
+                   <div className="absolute inset-0 bg-gradient-to-t from-black via-black/20 to-transparent flex flex-col justify-end p-8">
+                      <h3 className="text-2xl font-black text-white uppercase italic tracking-tighter leading-none mb-2 group-hover:text-red-500 transition-colors">
+                        {event.title}
+                      </h3>
+                      <div className="flex items-center justify-between">
+                        <p className="text-slate-400 text-[10px] font-bold uppercase tracking-widest flex items-center gap-1">
+                          <MapPin size={12} className="text-red-500" /> {event.venue}
+                        </p>
+                        <span className="text-red-500 text-[10px] font-black uppercase tracking-widest italic animate-pulse">
+                          {event._count?.registrations} Booked
+                        </span>
+                      </div>
+                   </div>
+                </div>
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* Global Feed Section */}
+        <section className="mb-16">
+          <div className="flex items-center justify-between mb-8">
+            <h2 className="text-3xl font-black text-white tracking-tighter uppercase italic flex items-center gap-3">
+              <span className="w-1.5 h-10 bg-red-600 rounded-full"></span>
+              All Campus Events
             </h2>
-            <button className="text-red-500 hover:text-red-400 text-sm font-bold flex items-center gap-1 transition-colors group">
-              See All <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
-            </button>
           </div>
           
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
-            {dummyEvents.map(event => (
-              <EventCard key={event.id} event={event} />
-            ))}
-          </div>
-        </section>
-
-        {/* Categories Section (Visual Grid) */}
-        <section className="mb-12">
-           <h2 className="text-2xl font-black text-white tracking-tight uppercase italic flex items-center gap-2 mb-6">
-              <span className="w-1 h-8 bg-red-600"></span>
-              Explore by Space
-            </h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-               {['Indoor', 'Outdoor', 'Labs', 'Grounds'].map((place, idx) => (
-                 <div key={idx} className="h-32 rounded-xl bg-slate-900 border border-slate-800 flex flex-col items-center justify-center cursor-pointer hover:bg-slate-800 hover:border-red-600/50 transition-all group overflow-hidden relative">
-                    <span className="text-white font-bold text-lg relative z-10">{place}</span>
-                    <span className="text-[10px] text-red-500 font-bold tracking-widest uppercase relative z-10 transition-transform group-hover:scale-110">Find Venue</span>
-                    <div className="absolute inset-x-0 bottom-0 h-1 bg-red-600 scale-x-0 group-hover:scale-x-100 transition-transform origin-left"></div>
-                 </div>
-               ))}
+          {filteredEvents.length > 0 ? (
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-6">
+              {filteredEvents.map(event => (
+                <EventCard key={event.id} event={event} />
+              ))}
             </div>
+          ) : (
+            <div className="text-slate-600 text-center py-24 bg-slate-950 rounded-[3rem] border border-dashed border-white/5 uppercase font-black tracking-[0.2em] text-sm animate-in fade-in duration-500">
+              Zero matches for your search
+            </div>
+          )}
         </section>
 
       </main>
 
       {/* Footer */}
-      <footer className="bg-slate-900 border-t border-slate-800 py-12 px-4 mt-20">
+      <footer className="bg-slate-900/50 backdrop-blur-md border-t border-white/5 py-20 px-4">
          <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
             <div>
-               <span className="text-2xl font-black text-red-600 tracking-tighter uppercase italic mb-4 block">RevaShow</span>
-               <p className="text-slate-400 text-sm leading-relaxed">The official event discovery and booking platform for REVA University students and faculty.</p>
+               <span className="text-3xl font-black text-red-600 tracking-tighter uppercase italic mb-6 block drop-shadow-xl underline decoration-white/10 underline-offset-8">RevaShow</span>
+               <p className="text-slate-500 text-sm leading-relaxed font-medium">The official high-performance event discovery and booking portal for REVA University students, faculty, and visionaries.</p>
             </div>
             <div>
-               <h4 className="text-white font-bold mb-4 uppercase text-sm tracking-widest">Support</h4>
-               <ul className="text-slate-500 text-sm space-y-2">
-                  <li className="hover:text-red-500 cursor-pointer transition-colors">Help Center</li>
-                  <li className="hover:text-red-500 cursor-pointer transition-colors">Terms of Service</li>
-                  <li className="hover:text-red-500 cursor-pointer transition-colors">Privacy Policy</li>
+               <h4 className="text-white font-black mb-6 uppercase text-[10px] tracking-[0.3em] text-slate-400 border-b border-white/5 pb-2 w-fit">Operations</h4>
+               <ul className="text-slate-500 text-xs font-bold space-y-3 uppercase tracking-widest">
+                  <li className="hover:text-red-500 cursor-pointer transition-colors flex items-center gap-2"><ArrowRight size={12} /> Support hub</li>
+                  <li className="hover:text-red-500 cursor-pointer transition-colors flex items-center gap-2"><ArrowRight size={12} /> Compliance</li>
+                  <li className="hover:text-red-500 cursor-pointer transition-colors flex items-center gap-2"><ArrowRight size={12} /> Campus Guidelines</li>
                </ul>
             </div>
             <div>
-               <h4 className="text-white font-bold mb-4 uppercase text-sm tracking-widest">Connect</h4>
-               <ul className="text-slate-500 text-sm space-y-2">
-                  <li className="hover:text-red-500 cursor-pointer transition-colors">GDSC REVA</li>
-                  <li className="hover:text-red-500 cursor-pointer transition-colors">IEEE Student Branch</li>
-                  <li className="hover:text-red-500 cursor-pointer transition-colors">D-Sense Club</li>
+               <h4 className="text-white font-black mb-6 uppercase text-[10px] tracking-[0.3em] text-slate-400 border-b border-white/5 pb-2 w-fit">Ecosystem</h4>
+               <ul className="text-slate-500 text-xs font-bold space-y-3 uppercase tracking-widest">
+                  <li className="hover:text-red-500 cursor-pointer transition-colors">Digital REVA</li>
+                  <li className="hover:text-red-500 cursor-pointer transition-colors">ACM REVA</li>
+                  <li className="hover:text-red-500 cursor-pointer transition-colors">Art Society</li>
                </ul>
             </div>
             <div>
-               <div className="bg-slate-800 p-4 rounded-xl border border-slate-700">
-                  <h4 className="text-white font-bold mb-2 text-xs uppercase tracking-widest">Get Updates</h4>
-                  <input type="text" placeholder="REVA Email" className="w-full bg-slate-950 border-none rounded py-2 px-3 text-xs mb-3 focus:ring-1 focus:ring-red-600" />
-                  <button className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2 rounded text-xs transition-colors">Subscribe</button>
+               <div className="bg-white/5 p-6 rounded-[2rem] border border-white/5 backdrop-blur-xl shadow-2xl relative overflow-hidden group">
+                  <div className="absolute inset-0 bg-red-600/5 -translate-x-full group-hover:translate-x-0 transition-transform duration-500"></div>
+                  <h4 className="text-white font-black mb-4 text-xs uppercase tracking-[0.2em] italic relative z-10">Broadcast List</h4>
+                  <input type="text" placeholder="REVA Mail ID" className="w-full bg-black/40 border border-white/10 rounded-xl py-3 px-4 text-xs mb-4 focus:ring-1 focus:ring-red-600 text-white placeholder-slate-700 font-bold relative z-10" />
+                  <button className="w-full bg-red-600 hover:bg-red-700 text-white font-black py-4 rounded-xl text-[10px] transition-all shadow-lg shadow-red-900/40 uppercase tracking-[0.2em] italic relative z-10">Authorize Access</button>
                </div>
+            </div>
+         </div>
+         <div className="max-w-7xl mx-auto mt-20 pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
+            <p className="text-slate-600 text-[10px] font-black uppercase tracking-[0.3em]">© 2024 RevaShow • Engineered for Campus Excellence</p>
+            <div className="flex gap-6">
+               <span className="text-slate-700 hover:text-red-600 text-[10px] font-black uppercase cursor-pointer transition-all">Instagram</span>
+               <span className="text-slate-700 hover:text-red-600 text-[10px] font-black uppercase cursor-pointer transition-all">X / Twitter</span>
+               <span className="text-slate-700 hover:text-red-600 text-[10px] font-black uppercase cursor-pointer transition-all">LinkedIn</span>
             </div>
          </div>
       </footer>

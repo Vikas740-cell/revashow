@@ -1,10 +1,11 @@
 generator client {
   provider = "prisma-client-js"
+  output   = "../src/generated/client"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = env("DATABASE_URL")
+  url      = "postgresql://postgres:postgres@localhost:51214/template1?sslmode=disable"
 }
 
 model User {
@@ -18,6 +19,7 @@ model User {
   phone         String?
   registrations Registration[]
   events        Event[]        @relation("OrganizerEvents")
+  notifications Notification[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 }
@@ -26,6 +28,12 @@ enum Role {
   STUDENT
   ORGANIZER
   ADMIN
+}
+
+enum EventStatus {
+  PENDING
+  PUBLISHED
+  REJECTED
 }
 
 model Category {
@@ -50,8 +58,9 @@ model Event {
   organizerId   String
   contactName   String
   contactPhone  String
+  status        EventStatus    @default(PENDING)
   registrations Registration[]
-  updates       EventUpdate[]
+  updates       Update[]
   createdAt     DateTime       @default(now())
   updatedAt     DateTime       @updatedAt
 }
@@ -75,10 +84,21 @@ enum RegistrationStatus {
   ATTENDED
 }
 
-model EventUpdate {
+model Update {
   id        String   @id @default(uuid())
   event     Event    @relation(fields: [eventId], references: [id])
   eventId   String
   message   String
+  createdAt DateTime @default(now())
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  user      User     @relation(fields: [userId], references: [id])
+  userId    String
+  title     String
+  message   String
+  type      String   @default("INFO") // INFO, REMINDER, ALERT
+  isRead    Boolean  @default(false)
   createdAt DateTime @default(now())
 }
