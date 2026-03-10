@@ -2,8 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import { getEventById, registerForEvent } from '../services/eventService';
-import { 
-  Calendar, MapPin, Users, Phone, User, 
+import {
+  Calendar, MapPin, Users, Phone, User,
   ChevronLeft, AlertCircle, CheckCircle2, Loader2,
   Info, ShieldCheck, CreditCard
 } from 'lucide-react';
@@ -50,7 +50,7 @@ const EventDetails = () => {
     try {
       const registration = await registerForEvent(id);
       setMessage({ type: 'success', text: 'Successfully registered for the event!' });
-      
+
       // Redirect to success page after a short delay
       setTimeout(() => {
         navigate(`/registration-success/${registration.id}`);
@@ -104,7 +104,7 @@ const EventDetails = () => {
   return (
     <div className="min-h-screen bg-slate-950 flex flex-col pb-20">
       <Navbar />
-      
+
       {/* Back Button */}
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-4 pt-8">
         <Link to="/" className="text-slate-400 hover:text-red-500 flex items-center gap-1 transition-colors group text-sm font-bold uppercase tracking-widest">
@@ -114,13 +114,13 @@ const EventDetails = () => {
 
       <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
-          
+
           {/* Left Column: Poster and Mobile Quick Info */}
           <div className="lg:col-span-1">
             <div className="sticky top-24">
               <div className="aspect-[2/3] rounded-3xl overflow-hidden shadow-2xl border border-slate-800 bg-slate-900 mb-8">
-                <img 
-                  src={event.poster || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop"} 
+                <img
+                  src={event.poster || "https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop"}
                   alt={event.title}
                   className="w-full h-full object-cover"
                 />
@@ -158,7 +158,7 @@ const EventDetails = () => {
 
           {/* Right Column: Content and Registration */}
           <div className="lg:col-span-2 space-y-12">
-            
+
             {/* Header Section */}
             <div>
               <div className="flex flex-wrap items-center gap-3 mb-4">
@@ -212,7 +212,7 @@ const EventDetails = () => {
             {event.rules && (
               <section className="bg-slate-900/40 p-8 rounded-3xl border border-slate-800/60 relative overflow-hidden">
                 <div className="absolute top-0 right-0 p-8 text-slate-800 flex flex-col items-end opacity-20">
-                    <ShieldCheck size={120} />
+                  <ShieldCheck size={120} />
                 </div>
                 <h2 className="text-2xl font-black text-white tracking-tight uppercase italic flex items-center gap-2 mb-6 relative z-10">
                   <span className="w-1 h-8 bg-red-600"></span>
@@ -244,43 +244,42 @@ const EventDetails = () => {
                 </div>
 
                 <div className="flex-grow sm:flex-grow-0 flex items-center gap-4">
-                   {message.text && (
+                  {message.text && (
                     <div className={`hidden md:flex items-center gap-2 text-sm font-bold uppercase tracking-widest ${message.type === 'success' ? 'text-green-500' : 'text-red-500'}`}>
-                      {message.type === 'success' ? <CheckCircle2 size={16}/> : <AlertCircle size={16}/>}
+                      {message.type === 'success' ? <CheckCircle2 size={16} /> : <AlertCircle size={16} />}
                       {message.text}
                     </div>
                   )}
 
-                  <button 
+                  <button
                     onClick={handleRegister}
                     disabled={isHousefull || registering}
-                    className={`flex-grow sm:flex-none flex items-center justify-center gap-2 px-10 py-4 rounded-full font-black uppercase tracking-widest text-sm italic transition-all shadow-2xl ${
-                      isHousefull 
-                      ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700' 
-                      : 'bg-red-600 hover:bg-red-700 text-white shadow-red-900/40'
-                    }`}
+                    className={`flex-grow sm:flex-none flex items-center justify-center gap-2 px-12 py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-xs italic transition-all shadow-2xl ${isHousefull
+                        ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
+                        : 'bg-red-600 hover:bg-red-700 text-white shadow-red-900/40 border border-red-500/20'
+                      }`}
                   >
                     {registering ? (
                       <>
                         <Loader2 className="animate-spin" size={18} />
-                        Processing...
+                        Processing Access...
                       </>
                     ) : isHousefull ? (
-                      'Housefull'
+                      'Housefull - Access Terminated'
                     ) : (
                       <>
                         <CreditCard size={18} />
-                        Register Now
+                        Authorize Registration
                       </>
                     )}
                   </button>
                 </div>
               </div>
-              
+
               {/* Mobile Message display */}
               {message.text && (
                 <div className={`md:hidden mt-2 text-center text-[10px] font-bold uppercase tracking-widest ${message.type === 'success' ? 'text-green-500' : 'text-red-500'}`}>
-                   {message.text}
+                  {message.text}
                 </div>
               )}
             </div>

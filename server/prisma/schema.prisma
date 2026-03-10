@@ -1,11 +1,10 @@
 generator client {
   provider = "prisma-client-js"
-  output   = "../src/generated/client"
 }
 
 datasource db {
   provider = "postgresql"
-  url      = "postgresql://postgres:postgres@localhost:51214/template1?sslmode=disable"
+  url      = "postgresql://postgres:postgres@localhost:5432/revashow?sslmode=disable"
 }
 
 model User {

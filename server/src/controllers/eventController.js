@@ -4,10 +4,10 @@ const prisma = require('../config/db');
 // @route   POST /api/events
 // @access  Private (Organizer/Admin)
 const createEvent = async (req, res) => {
-  const { 
-    title, description, rules, categoryName, 
-    date, time, venue, maxSeats, poster, 
-    contactName, contactPhone 
+  const {
+    title, description, rules, categoryName,
+    date, time, venue, maxSeats, poster,
+    contactName, contactPhone
   } = req.body;
 
   try {
@@ -54,7 +54,7 @@ const getEvents = async (req, res) => {
   try {
     const events = await prisma.event.findMany({
       where: { status: 'PUBLISHED' },
-      include: { 
+      include: {
         category: true,
         _count: {
           select: { registrations: true }
@@ -76,7 +76,7 @@ const getEventById = async (req, res) => {
   try {
     const event = await prisma.event.findUnique({
       where: { id: req.params.id },
-      include: { 
+      include: {
         category: true,
         organizer: {
           select: { name: true, email: true }
@@ -276,7 +276,7 @@ const getOrganizerEvents = async (req, res) => {
 // @access  Private (Organizer/Admin)
 const updateRegistrationStatus = async (req, res) => {
   const { status } = req.body; // e.g., 'ATTENDED', 'CANCELLED'
-  
+
   try {
     const registration = await prisma.registration.findUnique({
       where: { id: req.params.id },
@@ -309,7 +309,7 @@ const updateRegistrationStatus = async (req, res) => {
 // @access  Private (Organizer)
 const createEventUpdate = async (req, res) => {
   const { message } = req.body;
-  
+
   try {
     const event = await prisma.event.findUnique({
       where: { id: req.params.id }
@@ -403,6 +403,23 @@ const getTrendingEvents = async (req, res) => {
 // @access  Private
 const getPersonalizedRecommendations = async (req, res) => {
   try {
+    // If user is not logged in or doesn't have an ID, return latest events
+    if (!req.user || !req.user.id) {
+      const latest = await prisma.event.findMany({
+        where: {
+          status: 'PUBLISHED',
+          date: { gte: new Date() }
+        },
+        include: {
+          category: true,
+          _count: { select: { registrations: true } }
+        },
+        take: 6,
+        orderBy: { createdAt: 'desc' }
+      });
+      return res.json(latest);
+    }
+
     // 1. Get user's past registration categories
     const userRegs = await prisma.registration.findMany({
       where: { userId: req.user.id },

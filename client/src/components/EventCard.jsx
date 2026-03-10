@@ -1,5 +1,5 @@
 import React from 'react';
-import { Calendar, MapPin } from 'lucide-react';
+import { Calendar, MapPin, Users, ArrowRight } from 'lucide-react';
 import { Link } from 'react-router-dom';
 
 const EventCard = ({ event, compact = false }) => {
@@ -10,50 +10,68 @@ const EventCard = ({ event, compact = false }) => {
 
   const seatsRemaining = event.maxSeats - (event._count?.registrations || 0);
   const isFillingFast = seatsRemaining > 0 && seatsRemaining <= 10;
+  const isHousefull = seatsRemaining <= 0;
 
   return (
-    <Link to={`/events/${event.id}`} className={`block group ${compact ? 'max-w-[180px]' : ''}`}>
-      <div className="group cursor-pointer transform hover:-translate-y-1 transition-all duration-300">
-        {/* Poster Image Container */}
-        <div className={`relative overflow-hidden rounded-2xl bg-slate-800 shadow-xl group-hover:shadow-red-900/40 transition-all duration-300 ${compact ? 'aspect-[3/4]' : 'aspect-[2/3]'}`}>
-          <img 
-            src={event.poster || `https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop`} 
-            alt={event.title}
-            className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700"
-          />
-          {/* Overlay for Date */}
-          <div className="absolute top-3 left-3 bg-black/60 backdrop-blur-md px-2 py-1 rounded-lg text-[9px] uppercase font-black text-white border border-white/10 tracking-widest">
-            {formatDate(event.date)}
-          </div>
+    <div className={`group relative bg-slate-900/50 rounded-3xl border border-white/5 overflow-hidden transition-all duration-500 hover:border-red-600/30 hover:shadow-2xl hover:shadow-red-900/20 hover:-translate-y-2 ${compact ? 'w-full' : ''}`}>
+      {/* Poster Image */}
+      <div className="relative aspect-[4/5] overflow-hidden">
+        <img
+          src={event.poster || `https://images.unsplash.com/photo-1492684223066-81342ee5ff30?q=80&w=2070&auto=format&fit=crop`}
+          alt={event.title}
+          className="w-full h-full object-cover transition-transform duration-1000 group-hover:scale-110 group-hover:rotate-1"
+        />
+        <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/20 to-transparent"></div>
 
-          {/* Seat Availability Overlay */}
-          {isFillingFast && (
-             <div className="absolute bottom-3 left-3 right-3 bg-red-600/90 backdrop-blur-md py-1.5 rounded-lg text-center shadow-xl border border-white/20 animate-pulse">
-                <p className="text-[8px] font-black uppercase text-white tracking-widest">Last {seatsRemaining} Seats Left!</p>
-             </div>
-          )}
+        {/* Category Badge */}
+        <div className="absolute top-4 left-4">
+          <span className="bg-red-600/90 backdrop-blur-md text-white text-[10px] font-black px-3 py-1 rounded-full uppercase tracking-widest shadow-xl">
+            {event.category?.name || 'Event'}
+          </span>
         </div>
 
-        {/* Details */}
-        <div className="mt-4">
-          <h3 className={`text-white font-black uppercase italic tracking-tighter truncate group-hover:text-red-500 transition-colors ${compact ? 'text-sm' : 'text-lg'}`}>
-            {event.title}
-          </h3>
-          {!compact && (
-            <p className="text-slate-500 text-xs mt-1 flex items-center gap-1 group-hover:text-slate-400 transition-colors font-bold uppercase tracking-wider">
-              <MapPin size={12} className="text-red-600" />
-              {event.venue}
-            </p>
-          )}
-          <div className="flex items-center justify-between mt-3">
-             <span className="text-[9px] text-slate-600 font-black uppercase tracking-widest">{event.category?.name || 'General'}</span>
-             <span className={`text-[9px] font-black px-2 py-0.5 rounded-lg border uppercase tracking-widest ${!event.price || event.price === 0 ? 'bg-emerald-500/10 text-emerald-500 border-emerald-500/20' : 'bg-red-500/10 text-red-500 border-red-500/20'}`}>
-               {!event.price || event.price === 0 ? 'FREE' : `₹${event.price}`}
-             </span>
+        {/* Date Badge */}
+        <div className="absolute top-4 right-4 bg-slate-950/80 backdrop-blur-md border border-white/10 p-2 rounded-2xl flex flex-col items-center min-w-[50px]">
+          <span className="text-red-500 text-xs font-black leading-none">{formatDate(event.date).split(' ')[0]}</span>
+          <span className="text-white text-[8px] font-bold uppercase tracking-tighter mt-1">{formatDate(event.date).split(' ')[1]}</span>
+        </div>
+
+        {/* Seats Status */}
+        <div className="absolute bottom-4 left-4 right-4 flex items-center justify-between">
+          <div className={`flex items-center gap-1.5 px-3 py-1 rounded-full backdrop-blur-md border ${isHousefull ? 'bg-slate-950/80 border-slate-700 text-slate-500' : isFillingFast ? 'bg-red-600/20 border-red-600/50 text-red-500 animate-pulse' : 'bg-emerald-500/20 border-emerald-500/50 text-emerald-500'}`}>
+            <Users size={12} />
+            <span className="text-[9px] font-black uppercase tracking-widest">
+              {isHousefull ? 'Housefull' : isFillingFast ? `${seatsRemaining} Seats Left` : 'Available'}
+            </span>
           </div>
         </div>
       </div>
-    </Link>
+
+      {/* Content */}
+      <div className="p-6">
+        <h3 className="text-xl font-black text-white uppercase italic tracking-tighter leading-tight mb-2 group-hover:text-red-500 transition-colors line-clamp-1">
+          {event.title}
+        </h3>
+
+        <div className="space-y-2 mb-6">
+          <div className="flex items-center gap-2 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
+            <Calendar size={14} className="text-red-600" />
+            <span>{new Date(event.date).toDateString()}</span>
+          </div>
+          <div className="flex items-center gap-2 text-slate-400 text-[10px] font-bold uppercase tracking-widest">
+            <MapPin size={14} className="text-red-600" />
+            <span className="truncate">{event.venue}</span>
+          </div>
+        </div>
+
+        <Link
+          to={`/events/${event.id}`}
+          className="w-full flex items-center justify-center gap-2 bg-white/5 hover:bg-red-600 text-white hover:text-white font-black py-3 rounded-2xl text-[10px] uppercase tracking-[0.2em] transition-all duration-300 border border-white/10 hover:border-red-600 shadow-xl"
+        >
+          View Details <ArrowRight size={14} className="group-hover:translate-x-1 transition-transform" />
+        </Link>
+      </div>
+    </div>
   );
 };
 

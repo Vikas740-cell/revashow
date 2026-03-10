@@ -8,6 +8,8 @@ import OrganizerDashboard from './pages/OrganizerDashboard';
 import AdminPanel from './pages/AdminPanel';
 import { AuthProvider } from './context/AuthContext';
 
+import ProtectedRoute from './components/ProtectedRoute';
+
 function App() {
   return (
     <AuthProvider>
@@ -18,8 +20,24 @@ function App() {
           <Route path="/signup" element={<Signup />} />
           <Route path="/events/:id" element={<EventDetails />} />
           <Route path="/registration-success/:id" element={<RegistrationSuccess />} />
-          <Route path="/organizer" element={<OrganizerDashboard />} />
-          <Route path="/admin" element={<AdminPanel />} />
+
+          <Route
+            path="/organizer"
+            element={
+              <ProtectedRoute allowedRoles={['ORGANIZER', 'ADMIN']}>
+                <OrganizerDashboard />
+              </ProtectedRoute>
+            }
+          />
+
+          <Route
+            path="/admin"
+            element={
+              <ProtectedRoute allowedRoles={['ADMIN']}>
+                <AdminPanel />
+              </ProtectedRoute>
+            }
+          />
         </Routes>
       </Router>
     </AuthProvider>

@@ -1,10 +1,10 @@
 const express = require('express');
 const router = express.Router();
-const { 
-  createEvent, 
-  getEvents, 
-  getEventById, 
-  updateEvent, 
+const {
+  createEvent,
+  getEvents,
+  getEventById,
+  updateEvent,
   deleteEvent,
   registerForEvent,
   getRegistrationById,
@@ -20,12 +20,13 @@ const { protect, authorize } = require('../middleware/auth');
 router.get('/', getEvents);
 router.get('/organizer', protect, authorize('ORGANIZER', 'ADMIN'), getOrganizerEvents);
 router.get('/trending', getTrendingEvents);
-router.get('/recommendations', protect, getPersonalizedRecommendations);
+router.get('/recommendations', getPersonalizedRecommendations);
 router.get('/:id', getEventById);
 router.get('/registrations/:id', protect, getRegistrationById);
 router.get('/:id/participants', protect, authorize('ORGANIZER', 'ADMIN'), getEventParticipants);
 
 router.post('/', protect, authorize('ORGANIZER', 'ADMIN'), createEvent);
+router.post('/:id/register', protect, authorize('STUDENT'), registerForEvent);
 router.post('/:id/updates', protect, authorize('ORGANIZER', 'ADMIN'), createEventUpdate);
 router.patch('/registrations/:id/status', protect, authorize('ORGANIZER', 'ADMIN'), updateRegistrationStatus);
 

@@ -3,9 +3,9 @@ import Navbar from '../components/Navbar';
 import api from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import QRScanner from '../components/QRScanner';
-import { 
-  Plus, LayoutDashboard, Calendar, Users, 
-  Send, FileDown, MoreVertical, Edit, 
+import {
+  Plus, LayoutDashboard, Calendar, Users,
+  Send, FileDown, MoreVertical, Edit,
   Trash2, CheckCircle, Clock, XCircle,
   TrendingUp, Activity, MessageSquare, Save,
   X, AlertCircle, Loader2, Search, Scan
@@ -37,7 +37,7 @@ const OrganizerDashboard = () => {
     try {
       const res = await api.get('/events/organizer');
       setEvents(res.data);
-      
+
       const totalRegs = res.data.reduce((acc, ev) => acc + (ev._count?.registrations || 0), 0);
       setStats({
         totalEvents: res.data.length,
@@ -92,17 +92,17 @@ const OrganizerDashboard = () => {
   const exportToCSV = (event) => {
     const headers = ['Name', 'Email', 'SRN', 'Department', 'Phone', 'Status', 'Registered At'];
     const rows = participants.map(p => [
-      p.user.name,
-      p.user.email,
-      p.user.srn || 'N/A',
-      p.user.department || 'N/A',
-      p.user.phone || 'N/A',
+      p.user?.name || 'Unknown',
+      p.user?.email || 'N/A',
+      p.user?.srn || 'N/A',
+      p.user?.department || 'N/A',
+      p.user?.phone || 'N/A',
       p.status,
       new Date(p.createdAt).toLocaleDateString()
     ]);
 
-    const csvContent = "data:text/csv;charset=utf-8," 
-      + headers.join(",") + "\n" 
+    const csvContent = "data:text/csv;charset=utf-8,"
+      + headers.join(",") + "\n"
       + rows.map(e => e.join(",")).join("\n");
 
     const encodedUri = encodeURI(csvContent);
@@ -134,11 +134,10 @@ const OrganizerDashboard = () => {
                 <button
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm ${
-                    activeTab === item.id 
-                      ? 'bg-red-600/10 text-red-500 border border-red-600/20' 
+                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm ${activeTab === item.id
+                      ? 'bg-red-600/10 text-red-500 border border-red-600/20'
                       : 'hover:bg-white/5 text-slate-400'
-                  }`}
+                    }`}
                 >
                   <item.icon size={18} />
                   {item.label}
@@ -171,7 +170,7 @@ const OrganizerDashboard = () => {
                   <p className="text-slate-500 text-sm font-medium">Empowering REVA University organizers.</p>
                 </div>
                 {activeTab !== 'create' && (
-                  <button 
+                  <button
                     onClick={() => setActiveTab('create')}
                     className="flex items-center gap-2 bg-red-600 hover:bg-red-700 text-white font-black py-3 px-6 rounded-xl transition-all uppercase tracking-widest text-xs italic shadow-lg shadow-red-900/40"
                   >
@@ -212,7 +211,7 @@ const OrganizerDashboard = () => {
                         <div key={event.id} className="p-6 flex items-center justify-between hover:bg-white/5 transition-colors cursor-pointer" onClick={() => fetchParticipants(event.id)}>
                           <div className="flex items-center gap-4">
                             <div className="w-12 h-12 rounded-xl bg-slate-800 flex items-center justify-center border border-white/5 overflow-hidden">
-                                {event.poster ? <img src={event.poster} className="w-full h-full object-cover" /> : <Calendar size={20} className="text-slate-600" />}
+                              {event.poster ? <img src={event.poster} className="w-full h-full object-cover" /> : <Calendar size={20} className="text-slate-600" />}
                             </div>
                             <div>
                               <p className="text-white font-bold">{event.title}</p>
@@ -244,9 +243,9 @@ const OrganizerDashboard = () => {
                           <div className="w-full h-full bg-slate-800 flex items-center justify-center"><Calendar size={48} className="text-slate-700" /></div>
                         )}
                         <div className="absolute top-4 left-4">
-                           <span className="bg-red-600 text-[10px] font-black px-2 py-1 rounded uppercase tracking-widest text-white italic">
-                             {event.category?.name}
-                           </span>
+                          <span className="bg-red-600 text-[10px] font-black px-2 py-1 rounded uppercase tracking-widest text-white italic">
+                            {event.category?.name}
+                          </span>
                         </div>
                         <div className="absolute inset-0 bg-gradient-to-t from-slate-900 via-transparent to-transparent opacity-80"></div>
                       </div>
@@ -267,9 +266,9 @@ const OrganizerDashboard = () => {
                           </div>
                         </div>
                         <div className="flex gap-2">
-                           <button onClick={() => fetchParticipants(event.id)} className="flex-grow bg-white/5 hover:bg-white/10 text-white font-black py-2 rounded-xl text-[10px] uppercase tracking-widest transition-all">Manage</button>
-                           <button className="p-2 bg-white/5 hover:bg-red-600/20 text-red-500 rounded-xl transition-all"><Edit size={16}/></button>
-                           <button className="p-2 bg-white/5 hover:bg-red-600/20 text-red-500 rounded-xl transition-all"><Trash2 size={16}/></button>
+                          <button onClick={() => fetchParticipants(event.id)} className="flex-grow bg-white/5 hover:bg-white/10 text-white font-black py-2 rounded-xl text-[10px] uppercase tracking-widest transition-all">Manage</button>
+                          <button className="p-2 bg-white/5 hover:bg-red-600/20 text-red-500 rounded-xl transition-all"><Edit size={16} /></button>
+                          <button className="p-2 bg-white/5 hover:bg-red-600/20 text-red-500 rounded-xl transition-all"><Trash2 size={16} /></button>
                         </div>
                       </div>
                     </div>
@@ -280,137 +279,137 @@ const OrganizerDashboard = () => {
               {/* Create Event Tab */}
               {activeTab === 'create' && (
                 <div className="max-w-4xl bg-slate-900 border border-white/5 rounded-3xl p-8 md:p-12">
-                   <form onSubmit={handleCreateEvent} className="grid grid-cols-1 md:grid-cols-2 gap-8">
-                      <div className="space-y-6">
-                         <div>
-                            <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 block mb-2">Event Poster URL</label>
-                            <input 
-                              type="text" 
-                              placeholder="Direct image link" 
-                              className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-red-600 outline-none transition-all font-bold placeholder:text-slate-700" 
-                              value={formData.poster}
-                              onChange={(e) => setFormData({...formData, poster: e.target.value})}
-                            />
-                         </div>
-                         <div>
-                            <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 block mb-2 font-bold italic underline">Event Identity</label>
-                            <input 
-                              type="text" 
-                              placeholder="Event Title" 
-                              required
-                              className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-xl font-black italic uppercase italic tracking-tighter focus:border-red-600 outline-none transition-all" 
-                              value={formData.title}
-                              onChange={(e) => setFormData({...formData, title: e.target.value})}
-                            />
-                         </div>
-                         <div className="grid grid-cols-2 gap-4">
-                            <div>
-                               <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 block mb-2">Category</label>
-                               <select 
-                                 className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white font-bold outline-none"
-                                 value={formData.categoryName}
-                                 onChange={(e) => setFormData({...formData, categoryName: e.target.value})}
-                               >
-                                  <option>Workshops</option>
-                                  <option>Music/Arts</option>
-                                  <option>Sports</option>
-                                  <option>Hackathons</option>
-                               </select>
-                            </div>
-                            <div>
-                               <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 block mb-2">Max Capacity</label>
-                               <input 
-                                 type="number" 
-                                 className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white font-bold" 
-                                 value={formData.maxSeats}
-                                 onChange={(e) => setFormData({...formData, maxSeats: e.target.value})}
-                               />
-                            </div>
-                         </div>
-                         <div>
-                            <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 block mb-2">Brief Description</label>
-                            <textarea 
-                              rows="4"
-                              placeholder="What's the buzz?"
-                              className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white font-medium resize-none focus:border-red-600 outline-none transition-all"
-                              value={formData.description}
-                              onChange={(e) => setFormData({...formData, description: e.target.value})}
-                            ></textarea>
-                         </div>
+                  <form onSubmit={handleCreateEvent} className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                    <div className="space-y-6">
+                      <div>
+                        <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 block mb-2">Event Poster URL</label>
+                        <input
+                          type="text"
+                          placeholder="Direct image link"
+                          className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-red-600 outline-none transition-all font-bold placeholder:text-slate-700"
+                          value={formData.poster}
+                          onChange={(e) => setFormData({ ...formData, poster: e.target.value })}
+                        />
                       </div>
+                      <div>
+                        <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 block mb-2 font-bold italic underline">Event Identity</label>
+                        <input
+                          type="text"
+                          placeholder="Event Title"
+                          required
+                          className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-xl font-black italic uppercase italic tracking-tighter focus:border-red-600 outline-none transition-all"
+                          value={formData.title}
+                          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 block mb-2">Category</label>
+                          <select
+                            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white font-bold outline-none"
+                            value={formData.categoryName}
+                            onChange={(e) => setFormData({ ...formData, categoryName: e.target.value })}
+                          >
+                            <option>Workshops</option>
+                            <option>Music/Arts</option>
+                            <option>Sports</option>
+                            <option>Hackathons</option>
+                          </select>
+                        </div>
+                        <div>
+                          <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 block mb-2">Max Capacity</label>
+                          <input
+                            type="number"
+                            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white font-bold"
+                            value={formData.maxSeats}
+                            onChange={(e) => setFormData({ ...formData, maxSeats: e.target.value })}
+                          />
+                        </div>
+                      </div>
+                      <div>
+                        <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 block mb-2">Brief Description</label>
+                        <textarea
+                          rows="4"
+                          placeholder="What's the buzz?"
+                          className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white font-medium resize-none focus:border-red-600 outline-none transition-all"
+                          value={formData.description}
+                          onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                        ></textarea>
+                      </div>
+                    </div>
 
-                      <div className="space-y-6">
-                         <div className="grid grid-cols-1 gap-4">
-                            <div>
-                               <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 block mb-2">Date</label>
-                               <input 
-                                 type="date" 
-                                 required
-                                 className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white font-bold" 
-                                 value={formData.date}
-                                 onChange={(e) => setFormData({...formData, date: e.target.value})}
-                               />
-                            </div>
-                            <div>
-                               <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 block mb-2">Time Slot</label>
-                               <input 
-                                 type="text" 
-                                 placeholder="e.g. 10:00 AM - 4:00 PM"
-                                 className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white font-bold" 
-                                 value={formData.time}
-                                 onChange={(e) => setFormData({...formData, time: e.target.value})}
-                               />
-                            </div>
-                         </div>
-                         <div>
-                            <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 block mb-2">Venue / Lab / Auditorium</label>
-                            <input 
-                              type="text" 
-                              placeholder="REVA University Location"
-                              required
-                              className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white font-bold" 
-                              value={formData.venue}
-                              onChange={(e) => setFormData({...formData, venue: e.target.value})}
-                            />
-                         </div>
-                         <div>
-                            <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 block mb-2">Rules & Guidelines</label>
-                            <textarea 
-                              rows="3"
-                              placeholder="Eligibility, dress code, etc."
-                              className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white font-medium resize-none focus:border-red-600 outline-none transition-all"
-                              value={formData.rules}
-                              onChange={(e) => setFormData({...formData, rules: e.target.value})}
-                            ></textarea>
-                         </div>
-                         <div className="grid grid-cols-2 gap-4">
-                            <div>
-                               <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 block mb-2">POC Name</label>
-                               <input 
-                                 type="text" 
-                                 className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white font-bold" 
-                                 value={formData.contactName}
-                                 onChange={(e) => setFormData({...formData, contactName: e.target.value})}
-                               />
-                            </div>
-                            <div>
-                               <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 block mb-2">POC Phone</label>
-                               <input 
-                                 type="text" 
-                                 className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white font-bold" 
-                                 value={formData.contactPhone}
-                                 onChange={(e) => setFormData({...formData, contactPhone: e.target.value})}
-                               />
-                            </div>
-                         </div>
+                    <div className="space-y-6">
+                      <div className="grid grid-cols-1 gap-4">
+                        <div>
+                          <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 block mb-2">Date</label>
+                          <input
+                            type="date"
+                            required
+                            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white font-bold"
+                            value={formData.date}
+                            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 block mb-2">Time Slot</label>
+                          <input
+                            type="text"
+                            placeholder="e.g. 10:00 AM - 4:00 PM"
+                            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white font-bold"
+                            value={formData.time}
+                            onChange={(e) => setFormData({ ...formData, time: e.target.value })}
+                          />
+                        </div>
                       </div>
+                      <div>
+                        <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 block mb-2">Venue / Lab / Auditorium</label>
+                        <input
+                          type="text"
+                          placeholder="REVA University Location"
+                          required
+                          className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white font-bold"
+                          value={formData.venue}
+                          onChange={(e) => setFormData({ ...formData, venue: e.target.value })}
+                        />
+                      </div>
+                      <div>
+                        <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 block mb-2">Rules & Guidelines</label>
+                        <textarea
+                          rows="3"
+                          placeholder="Eligibility, dress code, etc."
+                          className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white font-medium resize-none focus:border-red-600 outline-none transition-all"
+                          value={formData.rules}
+                          onChange={(e) => setFormData({ ...formData, rules: e.target.value })}
+                        ></textarea>
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 block mb-2">POC Name</label>
+                          <input
+                            type="text"
+                            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white font-bold"
+                            value={formData.contactName}
+                            onChange={(e) => setFormData({ ...formData, contactName: e.target.value })}
+                          />
+                        </div>
+                        <div>
+                          <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 block mb-2">POC Phone</label>
+                          <input
+                            type="text"
+                            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white font-bold"
+                            value={formData.contactPhone}
+                            onChange={(e) => setFormData({ ...formData, contactPhone: e.target.value })}
+                          />
+                        </div>
+                      </div>
+                    </div>
 
-                      <div className="md:col-span-2 pt-6">
-                         <button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white font-black py-4 rounded-2xl transition-all uppercase tracking-[0.2em] italic text-sm shadow-xl shadow-red-900/40">
-                            Deploy Event to Campus
-                         </button>
-                      </div>
-                   </form>
+                    <div className="md:col-span-2 pt-6">
+                      <button type="submit" className="w-full bg-red-600 hover:bg-red-700 text-white font-black py-4 rounded-2xl transition-all uppercase tracking-[0.2em] italic text-sm shadow-xl shadow-red-900/40">
+                        Deploy Event to Campus
+                      </button>
+                    </div>
+                  </form>
                 </div>
               )}
 
@@ -421,16 +420,16 @@ const OrganizerDashboard = () => {
                   <div className="bg-slate-900 border border-white/5 p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4">
                     <div className="relative flex-grow max-w-md">
                       <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={18} />
-                      <input 
-                        type="text" 
-                        placeholder="Search by name, SRN, or department..." 
-                        className="w-full bg-black/40 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white font-bold text-sm focus:border-red-600 outline-none transition-all" 
+                      <input
+                        type="text"
+                        placeholder="Search by name, SRN, or department..."
+                        className="w-full bg-black/40 border border-white/10 rounded-xl pl-12 pr-4 py-3 text-white font-bold text-sm focus:border-red-600 outline-none transition-all"
                       />
                     </div>
                     <div className="flex gap-2">
-                       <button onClick={() => exportToCSV(events.find(e => e.id === selectedEventId))} className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white text-[10px] font-black uppercase tracking-widest px-4 py-3 rounded-xl transition-all">
-                          <FileDown size={14} /> Export CSV
-                       </button>
+                      <button onClick={() => exportToCSV(events.find(e => e.id === selectedEventId))} className="flex items-center gap-2 bg-slate-800 hover:bg-slate-700 text-white text-[10px] font-black uppercase tracking-widest px-4 py-3 rounded-xl transition-all">
+                        <FileDown size={14} /> Export CSV
+                      </button>
                     </div>
                   </div>
 
@@ -459,45 +458,44 @@ const OrganizerDashboard = () => {
                               </div>
                             </td>
                             <td className="p-6">
-                               <p className="text-white font-mono text-xs mb-1 uppercase opacity-80">{p.user.srn || 'N/A'}</p>
-                               <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">{p.user.department || 'GENERAL'}</p>
+                              <p className="text-white font-mono text-xs mb-1 uppercase opacity-80">{p.user.srn || 'N/A'}</p>
+                              <p className="text-[10px] text-slate-600 font-bold uppercase tracking-widest">{p.user.department || 'GENERAL'}</p>
                             </td>
                             <td className="p-6">
-                               <span className={`text-[9px] font-black px-2 py-1 rounded uppercase tracking-widest flex w-fit items-center gap-1.5 ${
-                                 p.status === 'ATTENDED' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' : 
-                                 p.status === 'CANCELLED' ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 
-                                 'bg-amber-500/10 text-amber-500 border border-amber-500/20'
-                               }`}>
-                                 {p.status === 'ATTENDED' ? <CheckCircle size={10} /> : p.status === 'CANCELLED' ? <XCircle size={10} /> : <Clock size={10} />}
-                                 {p.status}
-                               </span>
+                              <span className={`text-[9px] font-black px-2 py-1 rounded uppercase tracking-widest flex w-fit items-center gap-1.5 ${p.status === 'ATTENDED' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
+                                  p.status === 'CANCELLED' ? 'bg-red-500/10 text-red-500 border border-red-500/20' :
+                                    'bg-amber-500/10 text-amber-500 border border-amber-500/20'
+                                }`}>
+                                {p.status === 'ATTENDED' ? <CheckCircle size={10} /> : p.status === 'CANCELLED' ? <XCircle size={10} /> : <Clock size={10} />}
+                                {p.status}
+                              </span>
                             </td>
                             <td className="p-6">
-                               <div className="flex gap-2">
-                                  <button 
-                                    onClick={() => handleStatusUpdate(p.id, 'ATTENDED')}
-                                    className="p-2 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-500 hover:text-white rounded-lg transition-all border border-emerald-500/20"
-                                    title="Mark as Attended"
-                                  >
-                                    <CheckCircle size={14} />
-                                  </button>
-                                  <button 
-                                    onClick={() => handleStatusUpdate(p.id, 'CANCELLED')}
-                                    className="p-2 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-lg transition-all border border-red-500/20"
-                                    title="Cancel Registration"
-                                  >
-                                    <XCircle size={14} />
-                                  </button>
-                               </div>
+                              <div className="flex gap-2">
+                                <button
+                                  onClick={() => handleStatusUpdate(p.id, 'ATTENDED')}
+                                  className="p-2 bg-emerald-500/10 hover:bg-emerald-500 text-emerald-500 hover:text-white rounded-lg transition-all border border-emerald-500/20"
+                                  title="Mark as Attended"
+                                >
+                                  <CheckCircle size={14} />
+                                </button>
+                                <button
+                                  onClick={() => handleStatusUpdate(p.id, 'CANCELLED')}
+                                  className="p-2 bg-red-500/10 hover:bg-red-500 text-red-500 hover:text-white rounded-lg transition-all border border-red-500/20"
+                                  title="Cancel Registration"
+                                >
+                                  <XCircle size={14} />
+                                </button>
+                              </div>
                             </td>
                           </tr>
                         )) : (
                           <tr>
                             <td colSpan="4" className="p-20 text-center">
-                               <div className="flex flex-col items-center opacity-30">
-                                  <Users size={64} className="mb-4" />
-                                  <p className="text-xs uppercase font-black tracking-[0.2em]">No students signed up yet</p>
-                               </div>
+                              <div className="flex flex-col items-center opacity-30">
+                                <Users size={64} className="mb-4" />
+                                <p className="text-xs uppercase font-black tracking-[0.2em]">No students signed up yet</p>
+                              </div>
                             </td>
                           </tr>
                         )}
