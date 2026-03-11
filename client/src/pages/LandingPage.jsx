@@ -111,7 +111,7 @@ const LandingPage = () => {
               <Sparkles size={12} /> Live Event
             </div>
             <h1 className="text-4xl md:text-7xl font-black text-white italic tracking-tighter uppercase mb-3 leading-none drop-shadow-2xl">
-              Reva Show <span className="text-red-600">2024</span>
+              Reva Show <span className="text-red-600">2026</span>
             </h1>
             <p className="text-slate-300 text-sm md:text-xl max-w-2xl font-medium leading-tight opacity-80">
               The grandest celebration of talent, culture, and innovation at REVA University.

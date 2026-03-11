@@ -63,28 +63,28 @@ const Signup = () => {
           </div>
 
           <div className="grid grid-cols-2 gap-4">
-             <div className="relative group">
-                <Hash className="absolute left-3 top-3.5 text-slate-500" size={18} />
-                <input
-                  name="srn"
-                  placeholder="SRN"
-                  className="w-full bg-slate-800 border-none rounded-xl py-3 pl-10 pr-4 text-white placeholder-slate-500 focus:ring-1 focus:ring-red-600"
-                  value={formData.srn}
-                  onChange={handleChange}
-                  required
-                />
-             </div>
-             <div className="relative group">
-                <Building2 className="absolute left-3 top-3.5 text-slate-500" size={18} />
-                <input
-                  name="department"
-                  placeholder="Dept."
-                  className="w-full bg-slate-800 border-none rounded-xl py-3 pl-10 pr-4 text-white placeholder-slate-500 focus:ring-1 focus:ring-red-600"
-                  value={formData.department}
-                  onChange={handleChange}
-                  required
-                />
-             </div>
+            <div className="relative group">
+              <Hash className="absolute left-3 top-3.5 text-slate-500" size={18} />
+              <input
+                name="srn"
+                placeholder="SRN"
+                className="w-full bg-slate-800 border-none rounded-xl py-3 pl-10 pr-4 text-white placeholder-slate-500 focus:ring-1 focus:ring-red-600"
+                value={formData.srn}
+                onChange={handleChange}
+                required
+              />
+            </div>
+            <div className="relative group">
+              <Building2 className="absolute left-3 top-3.5 text-slate-500" size={18} />
+              <input
+                name="department"
+                placeholder="Dept."
+                className="w-full bg-slate-800 border-none rounded-xl py-3 pl-10 pr-4 text-white placeholder-slate-500 focus:ring-1 focus:ring-red-600"
+                value={formData.department}
+                onChange={handleChange}
+                required
+              />
+            </div>
           </div>
 
           <div className="relative group">

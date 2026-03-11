@@ -94,8 +94,8 @@ const AdminPanel = () => {
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm ${activeTab === item.id
-                      ? 'bg-red-600/10 text-red-500 border border-red-600/20 shadow-lg shadow-red-900/10'
-                      : 'hover:bg-white/5 text-slate-400'
+                    ? 'bg-red-600/10 text-red-500 border border-red-600/20 shadow-lg shadow-red-900/10'
+                    : 'hover:bg-white/5 text-slate-400'
                     }`}
                 >
                   <item.icon size={18} />
@@ -198,8 +198,8 @@ const AdminPanel = () => {
                           <div className="flex-grow">
                             <div className="flex items-center gap-2 mb-1">
                               <span className={`text-[8px] font-black px-1.5 py-0.5 rounded uppercase tracking-widest ring-1 ring-inset ${event.status === 'PUBLISHED' ? 'bg-emerald-500/10 text-emerald-500 ring-emerald-500/20' :
-                                  event.status === 'REJECTED' ? 'bg-red-500/10 text-red-500 ring-red-500/20' :
-                                    'bg-amber-500/10 text-amber-500 ring-amber-500/20 animate-pulse'
+                                event.status === 'REJECTED' ? 'bg-red-500/10 text-red-500 ring-red-500/20' :
+                                  'bg-amber-500/10 text-amber-500 ring-amber-500/20 animate-pulse'
                                 }`}>
                                 {event.status}
                               </span>
