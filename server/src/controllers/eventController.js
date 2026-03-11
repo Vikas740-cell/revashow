@@ -52,17 +52,50 @@ const createEvent = async (req, res) => {
 // @access  Public
 const getEvents = async (req, res) => {
   try {
-    const events = await prisma.event.findMany({
-      where: { status: 'PUBLISHED' },
-      include: {
-        category: true,
-        _count: {
-          select: { registrations: true }
+    const { page = 1, limit = 10, category, sort = 'asc' } = req.query;
+    const skip = (parseInt(page) - 1) * parseInt(limit);
+    const take = parseInt(limit);
+
+    const whereClause = { status: 'PUBLISHED' };
+
+    if (category && category !== 'All') {
+      whereClause.category = {
+        name: {
+          equals: category,
+          mode: 'insensitive'
         }
-      },
-      orderBy: { date: 'asc' }
+      };
+    }
+
+    const [events, total] = await Promise.all([
+      prisma.event.findMany({
+        where: whereClause,
+        include: {
+          category: true,
+          _count: {
+            select: { registrations: true }
+          }
+        },
+        orderBy: { date: sort === 'desc' ? 'desc' : 'asc' },
+        skip,
+        take
+      }),
+      prisma.event.count({ where: whereClause })
+    ]);
+
+    const totalPages = Math.ceil(total / take);
+
+    res.json({
+      events,
+      pagination: {
+        total,
+        page: parseInt(page),
+        limit: take,
+        totalPages,
+        hasNextPage: parseInt(page) < totalPages,
+        hasPrevPage: parseInt(page) > 1
+      }
     });
-    res.json(events);
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error while fetching events' });
@@ -268,6 +301,63 @@ const getOrganizerEvents = async (req, res) => {
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Server error while fetching organizer events' });
+  }
+};
+
+// @desc    Get analytics for organizer
+// @route   GET /api/events/organizer/analytics
+// @access  Private (Organizer/Admin)
+const getOrganizerAnalytics = async (req, res) => {
+  try {
+    const events = await prisma.event.findMany({
+      where: { organizerId: req.user.id },
+      include: {
+        category: true,
+        registrations: true
+      }
+    });
+
+    let totalRegistrations = 0;
+    let attendedCount = 0;
+    let categoryStats = {};
+    let popularEvents = [];
+
+    events.forEach(event => {
+      const regCount = event.registrations.length;
+      totalRegistrations += regCount;
+      attendedCount += event.registrations.filter(r => r.status === 'ATTENDED').length;
+
+      // Category map
+      const catName = event.category.name;
+      if (!categoryStats[catName]) categoryStats[catName] = { count: 0, registrations: 0 };
+      categoryStats[catName].count += 1;
+      categoryStats[catName].registrations += regCount;
+
+      popularEvents.push({
+        id: event.id,
+        title: event.title,
+        registrations: regCount,
+        maxSeats: event.maxSeats
+      });
+    });
+
+    popularEvents.sort((a, b) => b.registrations - a.registrations);
+    const topPopular = popularEvents.slice(0, 5);
+
+    const attendanceRate = totalRegistrations > 0 ? ((attendedCount / totalRegistrations) * 100).toFixed(1) : 0;
+
+    res.json({
+      totalEvents: events.length,
+      totalRegistrations,
+      attendedCount,
+      attendanceRate,
+      categoryStats,
+      popularEvents: topPopular
+    });
+
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: 'Server error while fetching analytics' });
   }
 };
 
@@ -484,6 +574,7 @@ module.exports = {
   registerForEvent,
   getRegistrationById,
   getOrganizerEvents,
+  getOrganizerAnalytics,
   updateRegistrationStatus,
   createEventUpdate,
   getEventParticipants,

@@ -9,6 +9,7 @@ const {
   registerForEvent,
   getRegistrationById,
   getOrganizerEvents,
+  getOrganizerAnalytics,
   updateRegistrationStatus,
   createEventUpdate,
   getEventParticipants,
@@ -18,6 +19,7 @@ const {
 const { protect, authorize } = require('../middleware/auth');
 
 router.get('/', getEvents);
+router.get('/organizer/analytics', protect, authorize('ORGANIZER', 'ADMIN'), getOrganizerAnalytics);
 router.get('/organizer', protect, authorize('ORGANIZER', 'ADMIN'), getOrganizerEvents);
 router.get('/trending', getTrendingEvents);
 router.get('/recommendations', getPersonalizedRecommendations);

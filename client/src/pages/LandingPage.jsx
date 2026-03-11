@@ -1,7 +1,9 @@
+// ... standard imports remain the same
 import React, { useState, useEffect } from 'react';
 import Navbar from '../components/Navbar';
 import CategoryFilters from '../components/CategoryFilters';
 import EventCard from '../components/EventCard';
+import EventCardSkeleton from '../components/EventCardSkeleton';
 import { getEvents, getTrendingEvents, getRecommendations } from '../services/eventService';
 import { ArrowRight, MapPin, Loader2, Sparkles, TrendingUp } from 'lucide-react';
 
@@ -13,46 +15,74 @@ const LandingPage = () => {
   const [searchTerm, setSearchTerm] = useState('');
   const [activeCategory, setActiveCategory] = useState('All');
   const [selectedDate, setSelectedDate] = useState('');
+  const [currentPage, setCurrentPage] = useState(1);
+  const [pagination, setPagination] = useState({});
+  const [sortOrder, setSortOrder] = useState('asc');
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchInitialData = async () => {
       try {
-        const [allEvents, trendingData, recommendedData] = await Promise.all([
-          getEvents(),
+        const [trendingData, recommendedData] = await Promise.all([
           getTrendingEvents(),
           getRecommendations()
         ]);
-        setEvents(allEvents);
         setTrending(trendingData);
         setRecommendations(recommendedData);
       } catch (err) {
-        console.error("Error fetching landing page data:", err);
+        console.error("Error fetching initial landing page data:", err);
+      }
+    };
+    fetchInitialData();
+  }, []);
+
+  useEffect(() => {
+    const fetchEvents = async () => {
+      setLoading(true);
+      try {
+        const res = await getEvents({
+          page: currentPage,
+          limit: 10,
+          category: activeCategory,
+          sort: sortOrder
+        });
+        setEvents(res.events || []);
+        setPagination(res.pagination || {});
+      } catch (err) {
+        console.error("Error fetching events:", err);
       } finally {
         setLoading(false);
       }
     };
-    fetchData();
-  }, []);
+    fetchEvents();
+  }, [currentPage, activeCategory, sortOrder]);
 
   const filteredEvents = events.filter(event => {
     const titleMatch = event.title?.toLowerCase().includes(searchTerm.toLowerCase());
     const venueMatch = event.venue?.toLowerCase().includes(searchTerm.toLowerCase());
-    const categoryMatch = activeCategory === 'All' || event.category?.name === activeCategory;
 
-    // Date match logic
     const eventDate = new Date(event.date).toISOString().split('T')[0];
     const dateMatch = !selectedDate || eventDate === selectedDate;
 
-    return (titleMatch || venueMatch) && categoryMatch && dateMatch;
+    return (titleMatch || venueMatch) && dateMatch;
   });
 
-  if (loading) {
+  if (loading && events.length === 0 && trending.length === 0) {
     return (
-      <div className="min-h-screen bg-slate-950 flex items-center justify-center">
-        <div className="flex flex-col items-center gap-4">
-          <Loader2 className="text-red-600 animate-spin" size={48} />
-          <p className="text-slate-500 font-bold tracking-widest uppercase text-xs animate-pulse">Syncing Campus Hub...</p>
-        </div>
+      <div className="min-h-screen bg-slate-950 flex flex-col selection:bg-red-600/30">
+        <Navbar searchTerm={searchTerm} onSearch={setSearchTerm} />
+        <CategoryFilters
+          activeCategory={activeCategory}
+          setCategory={setActiveCategory}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+        />
+        <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 w-full">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-8 mt-16">
+            {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((i) => (
+              <EventCardSkeleton key={i} />
+            ))}
+          </div>
+        </main>
       </div>
     );
   }
@@ -163,26 +193,62 @@ const LandingPage = () => {
               </span>
             </div>
 
-            {(searchTerm || activeCategory !== 'All' || selectedDate) && (
-              <button
-                onClick={() => {
-                  setSearchTerm('');
-                  setActiveCategory('All');
-                  setSelectedDate('');
-                }}
-                className="text-[10px] font-black text-red-500 hover:text-white transition-colors uppercase tracking-[0.2em] italic border-b border-red-500/30 pb-0.5"
-              >
-                Reset All Filters
-              </button>
+            {(searchTerm || activeCategory !== 'All' || selectedDate || sortOrder !== 'asc') && (
+              <div className="flex items-center gap-4">
+                <select
+                  value={sortOrder}
+                  onChange={(e) => setSortOrder(e.target.value)}
+                  className="bg-black/40 border border-white/10 text-white text-[10px] font-bold uppercase tracking-widest px-3 py-1.5 rounded-xl outline-none"
+                >
+                  <option value="asc">Earliest First</option>
+                  <option value="desc">Latest First</option>
+                </select>
+                <button
+                  onClick={() => {
+                    setSearchTerm('');
+                    setActiveCategory('All');
+                    setSelectedDate('');
+                    setSortOrder('asc');
+                    setCurrentPage(1);
+                  }}
+                  className="text-[10px] font-black text-red-500 hover:text-white transition-colors uppercase tracking-[0.2em] italic border-b border-red-500/30 pb-0.5"
+                >
+                  Reset All Filters
+                </button>
+              </div>
             )}
           </div>
 
           {filteredEvents.length > 0 ? (
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-8">
-              {filteredEvents.map(event => (
-                <EventCard key={event.id} event={event} />
-              ))}
-            </div>
+            <>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 xl:grid-cols-4 gap-8">
+                {filteredEvents.map(event => (
+                  <EventCard key={event.id} event={event} />
+                ))}
+              </div>
+              {/* Pagination Controls */}
+              {pagination.totalPages > 1 && (
+                <div className="flex items-center justify-center gap-4 mt-12">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(prev - 1, 1))}
+                    disabled={!pagination.hasPrevPage}
+                    className="px-4 py-2 bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all"
+                  >
+                    Previous
+                  </button>
+                  <span className="text-slate-400 text-[10px] font-bold tracking-widest uppercase">
+                    Page {pagination.page} of {pagination.totalPages}
+                  </span>
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(prev + 1, pagination.totalPages))}
+                    disabled={!pagination.hasNextPage}
+                    className="px-4 py-2 bg-white/5 hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed text-white text-[10px] font-black uppercase tracking-widest rounded-xl transition-all"
+                  >
+                    Next
+                  </button>
+                </div>
+              )}
+            </>
           ) : (
             <div className="text-slate-600 text-center py-24 bg-slate-950 rounded-[3rem] border border-dashed border-white/5 uppercase font-black tracking-[0.2em] text-sm animate-in fade-in duration-500">
               Zero matches for your search

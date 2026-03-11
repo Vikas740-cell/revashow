@@ -1,7 +1,7 @@
 import API from './api';
 
-export const getEvents = async () => {
-  const res = await API.get('/events');
+export const getEvents = async (params = {}) => {
+  const res = await API.get('/events', { params });
   return res.data;
 };
 

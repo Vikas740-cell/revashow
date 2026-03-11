@@ -1,6 +1,9 @@
 const express = require('express');
 const cors = require('cors');
 const dotenv = require('dotenv');
+const morgan = require('morgan');
+const path = require('path');
+const { notFound, errorHandler } = require('./middleware/errorMiddleware');
 
 dotenv.config();
 
@@ -38,6 +41,9 @@ createInitialAdmin();
 app.use(cors());
 app.use(express.json());
 
+// Request & Error Logging
+app.use(morgan('dev'));
+
 // Import Routes
 const authRoutes = require('./routes/authRoutes');
 const eventRoutes = require('./routes/eventRoutes');
@@ -53,6 +59,19 @@ app.use('/api/notifications', notificationRoutes);
 app.get('/api/health', (req, res) => {
   res.json({ status: 'OK', message: 'RevaShow Backend is running' });
 });
+
+// Production Deploy Setup (Optional monolithic serving)
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../../client/dist')));
+
+  app.get('*', (req, res) => {
+    res.sendFile(path.resolve(__dirname, '../../client/dist', 'index.html'));
+  });
+}
+
+// Error Handling Middlewares
+app.use(notFound);
+app.use(errorHandler);
 
 app.listen(PORT, () => {
   console.log(`Server running on port ${PORT}`);

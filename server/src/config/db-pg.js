@@ -78,12 +78,41 @@ const db = {
       let query = 'SELECT e.*, c.name as "categoryName", u.name as "organizerName", u.email as "organizerEmail", u.phone as "organizerPhone", (SELECT COUNT(*) FROM "Registration" r WHERE r."eventId" = e.id) as "registrationCount" FROM "Event" e LEFT JOIN "Category" c ON e."categoryId" = c.id LEFT JOIN "User" u ON e."organizerId" = u.id';
       const params = [];
       const conditions = [];
-      if (where?.status) { conditions.push(`e.status = $${params.length + 1}`); params.push(where.status); }
-      if (where?.organizerId) { conditions.push(`e."organizerId" = $${params.length + 1}`); params.push(where.organizerId); }
-      if (conditions.length) query += ' WHERE ' + conditions.join(' AND ');
-      query += ' ORDER BY e."createdAt" DESC';
-      if (take) { query += ` LIMIT $${params.length + 1}`; params.push(take); }
-      if (skip) { query += ` OFFSET $${params.length + 1}`; params.push(skip); }
+
+      if (where?.status) {
+        conditions.push(`e.status = $${params.length + 1}`);
+        params.push(where.status);
+      }
+      if (where?.organizerId) {
+        conditions.push(`e."organizerId" = $${params.length + 1}`);
+        params.push(where.organizerId);
+      }
+      // Handle category name filter (Prisma-like nested structure)
+      if (where?.category?.name?.equals) {
+        conditions.push(`c.name ILIKE $${params.length + 1}`);
+        params.push(where.category.name.equals);
+      }
+
+      if (conditions.length) {
+        query += ' WHERE ' + conditions.join(' AND ');
+      }
+
+      // Handle custom sorting
+      if (orderBy?.date) {
+        query += ` ORDER BY e.date ${orderBy.date.toUpperCase()}`;
+      } else {
+        query += ' ORDER BY e."createdAt" DESC';
+      }
+
+      if (take) {
+        query += ` LIMIT $${params.length + 1}`;
+        params.push(take);
+      }
+      if (skip) {
+        query += ` OFFSET $${params.length + 1}`;
+        params.push(skip);
+      }
+
       const res = await pool.query(query, params);
       return res.rows.map(row => ({
         ...row,
@@ -137,11 +166,20 @@ const db = {
     },
 
     count: async ({ where } = {}) => {
-      let query = 'SELECT COUNT(*) FROM "Event"';
+      let query = 'SELECT COUNT(*) FROM "Event" e LEFT JOIN "Category" c ON e."categoryId" = c.id';
       const params = [];
       const conditions = [];
-      if (where?.status) { conditions.push(`status = $${params.length + 1}`); params.push(where.status); }
-      if (conditions.length) query += ' WHERE ' + conditions.join(' AND ');
+      if (where?.status) {
+        conditions.push(`e.status = $${params.length + 1}`);
+        params.push(where.status);
+      }
+      if (where?.category?.name?.equals) {
+        conditions.push(`c.name ILIKE $${params.length + 1}`);
+        params.push(where.category.name.equals);
+      }
+      if (conditions.length) {
+        query += ' WHERE ' + conditions.join(' AND ');
+      }
       const res = await pool.query(query, params);
       return parseInt(res.rows[0].count, 10);
     },

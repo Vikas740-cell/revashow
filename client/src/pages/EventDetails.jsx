@@ -75,9 +75,86 @@ const EventDetails = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-slate-950 flex flex-col items-center justify-center">
-        <Loader2 className="text-red-600 animate-spin mb-4" size={48} />
-        <p className="text-slate-500 font-bold tracking-widest uppercase text-xs">Loading Event Details...</p>
+      <div className="min-h-screen bg-slate-950 flex flex-col pb-20 animate-pulse">
+        <Navbar />
+
+        {/* Back Button Skeleton */}
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full py-4 pt-8">
+          <div className="h-4 w-32 bg-slate-800 rounded"></div>
+        </div>
+
+        <main className="flex-grow max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full mt-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+
+            {/* Left Column Skeleton */}
+            <div className="lg:col-span-1 border border-white/5">
+              <div className="aspect-[2/3] rounded-3xl bg-slate-900 border border-slate-800 mb-8"></div>
+
+              <div className="hidden lg:block bg-slate-900/50 border border-slate-800 rounded-2xl p-6">
+                <div className="h-6 w-40 bg-slate-800 rounded mb-6"></div>
+                <div className="space-y-6">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-slate-800"></div>
+                    <div>
+                      <div className="h-3 w-20 bg-slate-800 rounded mb-2"></div>
+                      <div className="h-4 w-32 bg-slate-700 rounded"></div>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-full bg-slate-800"></div>
+                    <div>
+                      <div className="h-3 w-24 bg-slate-800 rounded mb-2"></div>
+                      <div className="h-4 w-32 bg-slate-700 rounded"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Right Column Skeleton */}
+            <div className="lg:col-span-2 space-y-12 border border-white/5">
+              <div>
+                <div className="flex flex-wrap items-center gap-3 mb-4">
+                  <div className="h-6 w-20 bg-slate-800 rounded"></div>
+                  <div className="h-6 w-24 bg-slate-800 rounded"></div>
+                </div>
+                {/* Title */}
+                <div className="h-12 md:h-16 w-3/4 bg-slate-800 rounded mb-6"></div>
+
+                {/* Details Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6 bg-slate-900/80 border border-slate-800 p-6 rounded-2xl">
+                  <div className="flex items-start gap-4">
+                    <div className="mt-1 p-2 w-10 h-10 bg-slate-800 rounded-lg"></div>
+                    <div className="flex-1 border border-white/5">
+                      <div className="h-3 w-12 bg-slate-800 rounded mb-2"></div>
+                      <div className="h-4 w-32 bg-slate-700 rounded mb-2"></div>
+                      <div className="h-4 w-24 bg-slate-800 rounded"></div>
+                    </div>
+                  </div>
+                  <div className="flex items-start gap-4">
+                    <div className="mt-1 p-2 w-10 h-10 bg-slate-800 rounded-lg"></div>
+                    <div className="flex-1 border border-white/5">
+                      <div className="h-3 w-16 bg-slate-800 rounded mb-2"></div>
+                      <div className="h-4 w-32 bg-slate-700 rounded mb-2"></div>
+                      <div className="h-4 w-40 bg-slate-800 rounded"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Description Skeleton */}
+              <section>
+                <div className="h-8 w-48 bg-slate-800 rounded mb-6 border border-white/5"></div>
+                <div className="space-y-3">
+                  <div className="h-4 w-full bg-slate-800 rounded"></div>
+                  <div className="h-4 w-full bg-slate-800 rounded"></div>
+                  <div className="h-4 w-5/6 bg-slate-800 rounded"></div>
+                  <div className="h-4 w-4/6 bg-slate-800 rounded"></div>
+                </div>
+              </section>
+            </div>
+          </div>
+        </main>
       </div>
     );
   }
@@ -255,8 +332,8 @@ const EventDetails = () => {
                     onClick={handleRegister}
                     disabled={isHousefull || registering}
                     className={`flex-grow sm:flex-none flex items-center justify-center gap-2 px-12 py-4 rounded-2xl font-black uppercase tracking-[0.2em] text-xs italic transition-all shadow-2xl ${isHousefull
-                        ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
-                        : 'bg-red-600 hover:bg-red-700 text-white shadow-red-900/40 border border-red-500/20'
+                      ? 'bg-slate-800 text-slate-500 cursor-not-allowed border border-slate-700'
+                      : 'bg-red-600 hover:bg-red-700 text-white shadow-red-900/40 border border-red-500/20'
                       }`}
                   >
                     {registering ? (

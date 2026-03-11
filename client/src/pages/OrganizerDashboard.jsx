@@ -19,6 +19,7 @@ const OrganizerDashboard = () => {
   const [selectedEventId, setSelectedEventId] = useState(null);
   const [participants, setParticipants] = useState([]);
   const [stats, setStats] = useState({ totalEvents: 0, totalRegistrations: 0, activeEvents: 0 });
+  const [analytics, setAnalytics] = useState(null);
   const [showCreateModal, setShowCreateModal] = useState(false);
 
   // Form State
@@ -27,6 +28,7 @@ const OrganizerDashboard = () => {
     date: '', time: '', venue: '', maxSeats: 100, poster: '',
     contactName: '', contactPhone: ''
   });
+  const [formErrors, setFormErrors] = useState({});
 
   useEffect(() => {
     fetchOrganizerData();
@@ -44,6 +46,10 @@ const OrganizerDashboard = () => {
         totalRegistrations: totalRegs,
         activeEvents: res.data.filter(e => new Date(e.date) >= new Date()).length
       });
+
+      // Also get analytics
+      const analyticsRes = await api.get('/events/organizer/analytics');
+      setAnalytics(analyticsRes.data);
     } catch (err) {
       console.error("Error fetching dashboard data:", err);
     } finally {
@@ -53,6 +59,23 @@ const OrganizerDashboard = () => {
 
   const handleCreateEvent = async (e) => {
     e.preventDefault();
+
+    // Validation
+    const errors = {};
+    if (!formData.title.trim()) errors.title = "Title is required";
+    if (!formData.date) errors.date = "Date is required";
+    if (!formData.maxSeats || formData.maxSeats <= 0) errors.maxSeats = "Max seats must be > 0";
+    if (!formData.poster.trim()) {
+      errors.poster = "Poster URL is required";
+    } else if (!/^https?:\/\/.+/.test(formData.poster)) {
+      errors.poster = "Please enter a valid URL";
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFormErrors(errors);
+      return;
+    }
+
     try {
       await api.post('/events', formData);
       setShowCreateModal(false);
@@ -63,6 +86,7 @@ const OrganizerDashboard = () => {
         date: '', time: '', venue: '', maxSeats: 100, poster: '',
         contactName: '', contactPhone: ''
       });
+      setFormErrors({});
     } catch (err) {
       alert("Failed to create event");
     }
@@ -135,8 +159,8 @@ const OrganizerDashboard = () => {
                   key={item.id}
                   onClick={() => setActiveTab(item.id)}
                   className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl transition-all font-bold text-sm ${activeTab === item.id
-                      ? 'bg-red-600/10 text-red-500 border border-red-600/20'
-                      : 'hover:bg-white/5 text-slate-400'
+                    ? 'bg-red-600/10 text-red-500 border border-red-600/20'
+                    : 'hover:bg-white/5 text-slate-400'
                     }`}
                 >
                   <item.icon size={18} />
@@ -286,21 +310,28 @@ const OrganizerDashboard = () => {
                         <input
                           type="text"
                           placeholder="Direct image link"
-                          className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white focus:border-red-600 outline-none transition-all font-bold placeholder:text-slate-700"
+                          className={`w-full bg-black/40 border ${formErrors.poster ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white focus:border-red-600 outline-none transition-all font-bold placeholder:text-slate-700`}
                           value={formData.poster}
-                          onChange={(e) => setFormData({ ...formData, poster: e.target.value })}
+                          onChange={(e) => {
+                            setFormData({ ...formData, poster: e.target.value });
+                            if (formErrors.poster) setFormErrors({ ...formErrors, poster: null });
+                          }}
                         />
+                        {formErrors.poster && <p className="text-red-500 text-xs mt-1">{formErrors.poster}</p>}
                       </div>
                       <div>
                         <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 block mb-2 font-bold italic underline">Event Identity</label>
                         <input
                           type="text"
                           placeholder="Event Title"
-                          required
-                          className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white text-xl font-black italic uppercase italic tracking-tighter focus:border-red-600 outline-none transition-all"
+                          className={`w-full bg-black/40 border ${formErrors.title ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white text-xl font-black italic uppercase tracking-tighter focus:border-red-600 outline-none transition-all`}
                           value={formData.title}
-                          onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+                          onChange={(e) => {
+                            setFormData({ ...formData, title: e.target.value });
+                            if (formErrors.title) setFormErrors({ ...formErrors, title: null });
+                          }}
                         />
+                        {formErrors.title && <p className="text-red-500 text-xs mt-1">{formErrors.title}</p>}
                       </div>
                       <div className="grid grid-cols-2 gap-4">
                         <div>
@@ -320,10 +351,14 @@ const OrganizerDashboard = () => {
                           <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 block mb-2">Max Capacity</label>
                           <input
                             type="number"
-                            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white font-bold"
+                            className={`w-full bg-black/40 border ${formErrors.maxSeats ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white font-bold`}
                             value={formData.maxSeats}
-                            onChange={(e) => setFormData({ ...formData, maxSeats: e.target.value })}
+                            onChange={(e) => {
+                              setFormData({ ...formData, maxSeats: e.target.value });
+                              if (formErrors.maxSeats) setFormErrors({ ...formErrors, maxSeats: null });
+                            }}
                           />
+                          {formErrors.maxSeats && <p className="text-red-500 text-xs mt-1">{formErrors.maxSeats}</p>}
                         </div>
                       </div>
                       <div>
@@ -344,11 +379,14 @@ const OrganizerDashboard = () => {
                           <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 block mb-2">Date</label>
                           <input
                             type="date"
-                            required
-                            className="w-full bg-black/40 border border-white/10 rounded-xl px-4 py-3 text-white font-bold"
+                            className={`w-full bg-black/40 border ${formErrors.date ? 'border-red-500' : 'border-white/10'} rounded-xl px-4 py-3 text-white font-bold`}
                             value={formData.date}
-                            onChange={(e) => setFormData({ ...formData, date: e.target.value })}
+                            onChange={(e) => {
+                              setFormData({ ...formData, date: e.target.value });
+                              if (formErrors.date) setFormErrors({ ...formErrors, date: null });
+                            }}
                           />
+                          {formErrors.date && <p className="text-red-500 text-xs mt-1">{formErrors.date}</p>}
                         </div>
                         <div>
                           <label className="text-[10px] uppercase font-black tracking-widest text-slate-500 block mb-2">Time Slot</label>
@@ -463,8 +501,8 @@ const OrganizerDashboard = () => {
                             </td>
                             <td className="p-6">
                               <span className={`text-[9px] font-black px-2 py-1 rounded uppercase tracking-widest flex w-fit items-center gap-1.5 ${p.status === 'ATTENDED' ? 'bg-emerald-500/10 text-emerald-500 border border-emerald-500/20' :
-                                  p.status === 'CANCELLED' ? 'bg-red-500/10 text-red-500 border border-red-500/20' :
-                                    'bg-amber-500/10 text-amber-500 border border-amber-500/20'
+                                p.status === 'CANCELLED' ? 'bg-red-500/10 text-red-500 border border-red-500/20' :
+                                  'bg-amber-500/10 text-amber-500 border border-amber-500/20'
                                 }`}>
                                 {p.status === 'ATTENDED' ? <CheckCircle size={10} /> : p.status === 'CANCELLED' ? <XCircle size={10} /> : <Clock size={10} />}
                                 {p.status}
@@ -501,6 +539,73 @@ const OrganizerDashboard = () => {
                         )}
                       </tbody>
                     </table>
+                  </div>
+                </div>
+              )}
+
+              {/* Reports Tab */}
+              {activeTab === 'reports' && analytics && (
+                <div className="space-y-8 animate-in fade-in slide-in-from-bottom-4 duration-700">
+                  <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+                    <div className="bg-slate-900 border border-white/5 p-6 rounded-2xl">
+                      <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-2">Total Registrations</p>
+                      <p className="text-4xl font-black text-white italic tracking-tighter">{analytics.totalRegistrations}</p>
+                    </div>
+                    <div className="bg-slate-900 border border-white/5 p-6 rounded-2xl">
+                      <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-2">Attendance Rate</p>
+                      <p className="text-4xl font-black text-emerald-500 italic tracking-tighter">{analytics.attendanceRate}%</p>
+                    </div>
+                    <div className="bg-slate-900 border border-white/5 p-6 rounded-2xl">
+                      <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-2">Total Events</p>
+                      <p className="text-4xl font-black text-white italic tracking-tighter">{analytics.totalEvents}</p>
+                    </div>
+                    <div className="bg-slate-900 border border-white/5 p-6 rounded-2xl">
+                      <p className="text-slate-500 text-[10px] font-black uppercase tracking-widest mb-2">Total Attendees</p>
+                      <p className="text-4xl font-black text-white italic tracking-tighter">{analytics.attendedCount}</p>
+                    </div>
+                  </div>
+
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                    {/* Popular Events */}
+                    <div className="bg-slate-900 border border-white/5 rounded-3xl p-8">
+                      <h3 className="text-xl font-black text-white uppercase italic tracking-tighter mb-6">Popular Events</h3>
+                      <div className="space-y-4">
+                        {analytics.popularEvents.map((event, idx) => (
+                          <div key={event.id} className="flex items-center justify-between p-4 bg-white/5 rounded-2xl">
+                            <div className="flex items-center gap-4">
+                              <span className="text-red-500 font-black text-xl italic w-6">#{idx + 1}</span>
+                              <p className="text-white font-bold">{event.title}</p>
+                            </div>
+                            <div className="text-right">
+                              <p className="text-emerald-500 font-black italic">{event.registrations} / {event.maxSeats}</p>
+                              <p className="text-[10px] text-slate-500 uppercase font-black tracking-widest">Registrations</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+
+                    {/* Category Stats */}
+                    <div className="bg-slate-900 border border-white/5 rounded-3xl p-8">
+                      <h3 className="text-xl font-black text-white uppercase italic tracking-tighter mb-6">Category Breakdown</h3>
+                      <div className="space-y-4">
+                        {Object.entries(analytics.categoryStats).map(([cat, stats]) => (
+                          <div key={cat} className="p-4 bg-white/5 rounded-2xl">
+                            <div className="flex justify-between items-center mb-2">
+                              <p className="text-white font-bold uppercase tracking-widest text-sm">{cat}</p>
+                              <p className="text-red-500 font-black italic">{stats.registrations} Regs</p>
+                            </div>
+                            <div className="w-full bg-slate-800 rounded-full h-2">
+                              <div
+                                className="bg-red-500 h-2 rounded-full"
+                                style={{ width: `${(stats.registrations / analytics.totalRegistrations) * 100 || 0}%` }}
+                              ></div>
+                            </div>
+                            <p className="text-[10px] text-slate-500 mt-2 font-black uppercase tracking-widest">{stats.count} Events</p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   </div>
                 </div>
               )}
